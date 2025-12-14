@@ -18,9 +18,6 @@ void main() async {
   // Register adapters
   Hive.registerAdapter(BookAdapter());
 
-  // Delete old box to handle schema changes
-  await Hive.deleteBoxFromDisk(AppConstants.booksBoxName);
-
   // Open boxes
   final booksBox = await Hive.openBox<Book>(AppConstants.booksBoxName);
   final settingsBox = await Hive.openBox<dynamic>(AppConstants.settingsBoxName);
