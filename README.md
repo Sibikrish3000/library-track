@@ -1,7 +1,6 @@
 # Personal Library Manager
 
 [![CI/CD Pipeline](https://github.com/sibikrish3000/library_track/actions/workflows/main.yml/badge.svg)](https://github.com/sibikrish3000/library_track/actions)
-[![codecov](https://codecov.io/gh/sibikrish3000/library_track/branch/main/graph/badge.svg)](https://codecov.io/gh/sibikrish3000/library_track)
 
 A production-ready Flutter application for managing your personal book library, demonstrating mastery of **Clean Architecture**, **advanced state management**, and **robust testing practices**.
 
