@@ -1,0 +1,155 @@
+{
+  "@@locale": "en",
+  "appTitle": "Personal Library",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "addBook": "Add Book",
+  "@addBook": {
+    "description": "Button text to add a new book"
+  },
+  "editBook": "Edit Book",
+  "@editBook": {
+    "description": "Button text to edit a book"
+  },
+  "deleteBook": "Delete Book",
+  "@deleteBook": {
+    "description": "Button text to delete a book"
+  },
+  "deleteBookConfirmation": "Are you sure you want to delete this book? This action cannot be undone.",
+  "@deleteBookConfirmation": {
+    "description": "Confirmation message for deleting a book"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete action text"
+  },
+  "bookDeleted": "Book deleted",
+  "@bookDeleted": {
+    "description": "Message shown when a book is deleted"
+  },
+  "undo": "Undo",
+  "@undo": {
+    "description": "Undo action text"
+  },
+  "searchBooks": "Search books...",
+  "@searchBooks": {
+    "description": "Search bar hint text"
+  },
+  "title": "Title",
+  "@title": {
+    "description": "Book title field label"
+  },
+  "author": "Author",
+  "@author": {
+    "description": "Book author field label"
+  },
+  "isbn": "ISBN",
+  "@isbn": {
+    "description": "Book ISBN field label"
+  },
+  "description": "Description",
+  "@description": {
+    "description": "Book description field label"
+  },
+  "publicationYear": "Publication Year",
+  "@publicationYear": {
+    "description": "Book publication year field label"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "titleRequired": "Title is required",
+  "@titleRequired": {
+    "description": "Validation error for empty title"
+  },
+  "authorRequired": "Author is required",
+  "@authorRequired": {
+    "description": "Validation error for empty author"
+  },
+  "invalidIsbn": "Invalid ISBN format",
+  "@invalidIsbn": {
+    "description": "Validation error for invalid ISBN"
+  },
+  "emptyLibraryTitle": "Your library is empty",
+  "@emptyLibraryTitle": {
+    "description": "Empty state title"
+  },
+  "emptyLibraryMessage": "Add your first book to get started",
+  "@emptyLibraryMessage": {
+    "description": "Empty state message"
+  },
+  "noResultsFound": "No results found",
+  "@noResultsFound": {
+    "description": "Message when search returns no results"
+  },
+  "errorLoadingBooks": "Error loading books",
+  "@errorLoadingBooks": {
+    "description": "Error message when loading fails"
+  },
+  "themeMode": "Theme",
+  "@themeMode": {
+    "description": "Theme setting label"
+  },
+  "lightMode": "Light",
+  "@lightMode": {
+    "description": "Light theme option"
+  },
+  "darkMode": "Dark",
+  "@darkMode": {
+    "description": "Dark theme option"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings screen title"
+  },
+  "toRead": "To Read",
+  "@toRead": {
+    "description": "Reading status: To Read"
+  },
+  "reading": "Reading",
+  "@reading": {
+    "description": "Reading status: Reading"
+  },
+  "completed": "Completed",
+  "@completed": {
+    "description": "Reading status: Completed"
+  },
+  "noBooksFound": "No books found",
+  "@noBooksFound": {
+    "description": "Message when no books are found"
+  },
+  "addBookPrompt": "Add a book to get started",
+  "@addBookPrompt": {
+    "description": "Prompt to add a book"
+  },
+  "genre": "Genre",
+  "@genre": {
+    "description": "Genre field label"
+  },
+  "customGenre": "Custom Genre",
+  "@customGenre": {
+    "description": "Custom genre field label"
+  },
+  "customGenreRequired": "Custom genre is required",
+  "@customGenreRequired": {
+    "description": "Validation error for empty custom genre"
+  },
+  "favorite": "Favorite",
+  "@favorite": {
+    "description": "Favorite switch label"
+  },
+  "readingStatus": "Reading Status",
+  "@readingStatus": {
+    "description": "Reading status dropdown label"
+  },
+  "saving": "Saving...",
+  "@saving": {
+    "description": "Saving indicator text"
+  }
+}
