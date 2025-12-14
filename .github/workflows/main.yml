@@ -19,18 +19,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Only verify version match if strictly triggered by a Tag
       - name: Verify Version Match
-        # Only run this check if a tag triggered the workflow
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          # Extract version from tag (remove 'refs/tags/v')
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
-          
-          # Extract version from pubspec.yaml (remove 'version: ' and anything after '+')
           PUB_VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1 | tr -d ' ')
-          
-          echo "Tag Version: $TAG_VERSION"
-          echo "Pubspec Version: $PUB_VERSION"
           
           if [ "$TAG_VERSION" != "$PUB_VERSION" ]; then
             echo "::error::Version Mismatch! Git Tag (v$TAG_VERSION) does not match pubspec.yaml ($PUB_VERSION)."
@@ -70,6 +64,7 @@ jobs:
     name: Build Android APKs
     needs: analyze-and-test
     runs-on: ubuntu-latest
+    # Allow Main OR Tags
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     
     steps:
@@ -98,21 +93,17 @@ jobs:
       - name: Generate code
         run: flutter pub run build_runner build --delete-conflicting-outputs
 
-      # 1. Build Universal APK
       - name: Build Universal APK
         run: flutter build apk --release
 
-      # 2. Stage Universal APK
       - name: Stage Universal APK
         run: |
           mkdir -p apk_staging
           mv build/app/outputs/flutter-apk/app-release.apk apk_staging/app-universal.apk
 
-      # 3. Build Split APKs (v7 and v8)
       - name: Build Split APKs
         run: flutter build apk --release --split-per-abi
 
-      # 4. Stage Split APKs
       - name: Stage Split APKs
         run: |
           mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk apk_staging/
@@ -163,9 +154,39 @@ jobs:
     name: Deploy to Release
     needs: [build-android, build-web]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    # Trigger on Tag OR Main
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
     
     steps:
+      # We need checkout now to read pubspec.yaml if it's not a tag
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine Version & Tag
+        id: meta
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            # Tagged Trigger
+            VERSION=${GITHUB_REF#refs/tags/}
+            RELEASE_TAG=$VERSION
+            RELEASE_NAME="Release $VERSION"
+            IS_PRERELEASE=false
+            echo "::notice::Triggered by Git Tag: $VERSION"
+          else
+            # Main Branch Trigger
+            # Extract version from pubspec.yaml
+            VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1 | tr -d ' ')
+            RELEASE_TAG="latest"
+            RELEASE_NAME="Development Build - v$VERSION"
+            IS_PRERELEASE=true
+            echo "::notice::Triggered by Main. Pubspec: $VERSION. Using 'latest' tag."
+          fi
+          
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+          echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
+          echo "IS_PRERELEASE=$IS_PRERELEASE" >> $GITHUB_ENV
+
       - name: Download Android Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -178,29 +199,31 @@ jobs:
           name: web-build
           path: release-artifacts/web
 
-      - name: Prepare Release Files
+      - name: Rename & Zip Artifacts
         run: |
-          VERSION_TAG=${GITHUB_REF_NAME}
+          # Rename Android Files with the detected VERSION
+          mv release-artifacts/android/app-universal.apk release-artifacts/android/app-universal-${{ env.VERSION }}.apk
+          mv release-artifacts/android/app-armeabi-v7a-release.apk release-artifacts/android/app-armeabi-v7a-${{ env.VERSION }}.apk
+          mv release-artifacts/android/app-arm64-v8a-release.apk release-artifacts/android/app-arm64-v8a-${{ env.VERSION }}.apk
           
-          # Rename Android Artifacts
-          mv release-artifacts/android/app-universal.apk release-artifacts/android/app-universal-${VERSION_TAG}.apk
-          mv release-artifacts/android/app-armeabi-v7a-release.apk release-artifacts/android/app-armeabi-v7a-${VERSION_TAG}.apk
-          mv release-artifacts/android/app-arm64-v8a-release.apk release-artifacts/android/app-arm64-v8a-${VERSION_TAG}.apk
-          
-          # Zip Web Build
+          # Zip Web
           cd release-artifacts/web
-          zip -r ../../web-build-${VERSION_TAG}.zip .
+          zip -r ../../web-build-${{ env.VERSION }}.zip .
           cd ../..
 
-      - name: Create GitHub Release
+      - name: Update Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: ${{ env.RELEASE_NAME }}
+          body: |
+            Automated Release.
+            Version: ${{ env.VERSION }}
+            Commit: ${{ github.sha }}
           draft: false
-          prerelease: false
+          prerelease: ${{ env.IS_PRERELEASE }}
           files: |
-            release-artifacts/android/app-universal-${{ github.ref_name }}.apk
-            release-artifacts/android/app-armeabi-v7a-${{ github.ref_name }}.apk
-            release-artifacts/android/app-arm64-v8a-${{ github.ref_name }}.apk
-            web-build-${{ github.ref_name }}.zip
+            release-artifacts/android/app-universal-${{ env.VERSION }}.apk
+            release-artifacts/android/app-armeabi-v7a-${{ env.VERSION }}.apk
+            release-artifacts/android/app-arm64-v8a-${{ env.VERSION }}.apk
+            web-build-${{ env.VERSION }}.zip
