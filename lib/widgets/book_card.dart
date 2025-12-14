@@ -66,14 +66,17 @@ class BookCard extends StatelessWidget {
                               book.coverUrl!,
                               width: double.infinity,
                               fit: BoxFit.cover,
-                              errorBuilder: (c, e, s) => Container(
-                                color: theme.colorScheme.surfaceContainerHighest,
-                                child: const Center(child: Icon(Icons.book, size: 40)),
+                              errorBuilder: (c, e, s) => ColoredBox(
+                                color:
+                                    theme.colorScheme.surfaceContainerHighest,
+                                child: const Center(
+                                    child: Icon(Icons.book, size: 40),),
                               ),
                             )
-                          : Container(
+                          : ColoredBox(
                               color: theme.colorScheme.surfaceContainerHighest,
-                              child: const Center(child: Icon(Icons.book, size: 40)),
+                              child: const Center(
+                                  child: Icon(Icons.book, size: 40),),
                             ),
                     ),
                     if (onToggleFavorite != null)
@@ -87,9 +90,12 @@ class BookCard extends StatelessWidget {
                           ),
                           child: IconButton(
                             icon: Icon(
-                              book.isFavorite ? Icons.favorite : Icons.favorite_border,
+                              book.isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
                               size: 20,
-                              color: book.isFavorite ? Colors.red : Colors.white,
+                              color:
+                                  book.isFavorite ? Colors.red : Colors.white,
                             ),
                             onPressed: onToggleFavorite,
                             constraints: const BoxConstraints(),
@@ -101,7 +107,7 @@ class BookCard extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -175,9 +181,13 @@ class BookCard extends StatelessWidget {
                           IconButton(
                             icon: Center(
                               child: Icon(
-                                book.isFavorite ? Icons.favorite : Icons.favorite_border,
+                                book.isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
                                 size: 20,
-                                color: book.isFavorite ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
+                                color: book.isFavorite
+                                    ? theme.colorScheme.error
+                                    : theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
                             onPressed: onToggleFavorite,
@@ -228,14 +238,16 @@ class BookCard extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: _getStatusColor(context, book.readingStatus),
+                              color:
+                                  _getStatusColor(context, book.readingStatus),
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             _getStatusText(book.readingStatus),
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: _getStatusColor(context, book.readingStatus),
+                              color:
+                                  _getStatusColor(context, book.readingStatus),
                             ),
                           ),
                         ),

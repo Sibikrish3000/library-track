@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:libarary_gen/models/book.dart';
 import 'package:libarary_gen/providers/book_provider.dart';
 import 'package:libarary_gen/providers/providers.dart';
 import 'package:libarary_gen/screens/book_details_screen.dart';
 import 'package:libarary_gen/utils/validators.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BookFormScreen extends ConsumerStatefulWidget {
   const BookFormScreen({this.book, super.key});
@@ -17,9 +17,10 @@ class BookFormScreen extends ConsumerStatefulWidget {
   ConsumerState<BookFormScreen> createState() => _BookFormScreenState();
 }
 
-class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTickerProviderStateMixin {
+class _BookFormScreenState extends ConsumerState<BookFormScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   // Form Controllers
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
@@ -59,11 +60,11 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    
+
     if (widget.book != null) {
       _populateForm(widget.book!);
       // If editing, default to manual entry tab (index 1)
-      _tabController.index = 1; 
+      _tabController.index = 1;
     }
   }
 
@@ -78,7 +79,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
     _coverUrlController.text = book.coverUrl ?? '';
     _isFavorite = book.isFavorite;
     _readingStatus = book.readingStatus;
-    
+
     if (mounted) setState(() {});
   }
 
@@ -127,27 +128,31 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
     // Show loading snackbar
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Fetching book details...'), duration: Duration(seconds: 1)),
+      const SnackBar(
+        content: Text('Fetching book details...'),
+        duration: Duration(seconds: 1),
+      ),
     );
 
-    Book fullBook = book;
+    var fullBook = book;
     try {
-       // book.id holds the OpenLibrary key (e.g. /works/OL...)
-       if (book.id.startsWith('/works/')) {
-          fullBook = await ref.read(openLibraryServiceProvider).getBookDetails(book);
-       }
+      // book.id holds the OpenLibrary key (e.g. /works/OL...)
+      if (book.id.startsWith('/works/')) {
+        fullBook =
+            await ref.read(openLibraryServiceProvider).getBookDetails(book);
+      }
     } catch (e) {
-       // Ignore error, just proceed without extra details
-       debugPrint('Error fetching details: $e');
+      // Ignore error, just proceed without extra details
+      debugPrint('Error fetching details: $e');
     }
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     // Show Overview Page (Preview)
-    Navigator.push(
+    await Navigator.push<void>(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => BookDetailsScreen(
           book: fullBook,
           isPreview: true,
@@ -156,7 +161,9 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
             _populateForm(fullBook);
             _tabController.animateTo(1); // Switch to Manual Entry tab
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Book details loaded. Please review and save.')),
+              const SnackBar(
+                content: Text('Book details loaded. Please review and save.'),
+              ),
             );
           },
         ),
@@ -182,29 +189,49 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
           id: widget.book!.id,
           title: _titleController.text.trim(),
           author: _authorController.text.trim(),
-          isbn: _isbnController.text.trim().isEmpty ? null : _isbnController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
-          publicationYear: _yearController.text.isEmpty ? null : int.tryParse(_yearController.text),
+          isbn: _isbnController.text.trim().isEmpty
+              ? null
+              : _isbnController.text.trim(),
+          description: _descriptionController.text.trim().isEmpty
+              ? null
+              : _descriptionController.text.trim(),
+          publicationYear: _yearController.text.isEmpty
+              ? null
+              : int.tryParse(_yearController.text),
           genre: _selectedGenre,
-          customGenre: _selectedGenre == 'Custom' ? _customGenreController.text.trim() : null,
+          customGenre: _selectedGenre == 'Custom'
+              ? _customGenreController.text.trim()
+              : null,
           isFavorite: _isFavorite,
           readingStatus: _readingStatus,
           createdAt: widget.book!.createdAt,
-          coverUrl: _coverUrlController.text.trim().isEmpty ? null : _coverUrlController.text.trim(),
+          coverUrl: _coverUrlController.text.trim().isEmpty
+              ? null
+              : _coverUrlController.text.trim(),
         );
       } else {
         // Add new book
         await notifier.addNewBook(
           title: _titleController.text.trim(),
           author: _authorController.text.trim(),
-          isbn: _isbnController.text.trim().isEmpty ? null : _isbnController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
-          publicationYear: _yearController.text.isEmpty ? null : int.tryParse(_yearController.text),
+          isbn: _isbnController.text.trim().isEmpty
+              ? null
+              : _isbnController.text.trim(),
+          description: _descriptionController.text.trim().isEmpty
+              ? null
+              : _descriptionController.text.trim(),
+          publicationYear: _yearController.text.isEmpty
+              ? null
+              : int.tryParse(_yearController.text),
           genre: _selectedGenre,
-          customGenre: _selectedGenre == 'Custom' ? _customGenreController.text.trim() : null,
+          customGenre: _selectedGenre == 'Custom'
+              ? _customGenreController.text.trim()
+              : null,
           isFavorite: _isFavorite,
           readingStatus: _readingStatus,
-          coverUrl: _coverUrlController.text.trim().isEmpty ? null : _coverUrlController.text.trim(),
+          coverUrl: _coverUrlController.text.trim().isEmpty
+              ? null
+              : _coverUrlController.text.trim(),
         );
       }
 
@@ -214,7 +241,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     } finally {
@@ -234,16 +261,18 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditing ? l10n.editBook : l10n.addBook),
-        bottom: isEditing ? null : TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Online Search', icon: Icon(Icons.search)),
-            Tab(text: 'Manual Entry', icon: Icon(Icons.edit)),
-          ],
-        ),
+        bottom: isEditing
+            ? null
+            : TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: 'Online Search', icon: Icon(Icons.search)),
+                  Tab(text: 'Manual Entry', icon: Icon(Icons.edit)),
+                ],
+              ),
       ),
-      body: isEditing 
-          ? _buildManualEntryForm(l10n) 
+      body: isEditing
+          ? _buildManualEntryForm(l10n)
           : TabBarView(
               controller: _tabController,
               children: [
@@ -258,7 +287,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               Expanded(
@@ -283,7 +312,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
         else if (_searchError != null)
           Expanded(child: Center(child: Text('Error: $_searchError')))
         else if (_searchResults.isEmpty && _searchController.text.isNotEmpty)
-           const Expanded(child: Center(child: Text('No results found')))
+          const Expanded(child: Center(child: Text('No results found')))
         else
           Expanded(
             child: ListView.builder(
@@ -291,8 +320,11 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
               itemBuilder: (context, index) {
                 final book = _searchResults[index];
                 return ListTile(
-                  leading: book.coverUrl != null 
-                      ? Image.network(book.coverUrl!, width: 50, fit: BoxFit.cover, errorBuilder: (c,e,s) => const Icon(Icons.book))
+                  leading: book.coverUrl != null
+                      ? Image.network(book.coverUrl!,
+                          width: 50,
+                          fit: BoxFit.cover,
+                          errorBuilder: (c, e, s) => const Icon(Icons.book),)
                       : const Icon(Icons.book),
                   title: Text(book.title),
                   subtitle: Text(book.author),
@@ -327,7 +359,8 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
                   _coverUrlController.text,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) {
-                    return const Center(child: Icon(Icons.broken_image, size: 50));
+                    return const Center(
+                        child: Icon(Icons.broken_image, size: 50),);
                   },
                 ),
               ),
@@ -340,7 +373,8 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
               border: const OutlineInputBorder(),
               prefixIcon: const Icon(Icons.book),
             ),
-            validator: (value) => Validators.requiredField(value, l10n.titleRequired),
+            validator: (value) =>
+                Validators.requiredField(value, l10n.titleRequired),
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -350,7 +384,8 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
               border: const OutlineInputBorder(),
               prefixIcon: const Icon(Icons.person),
             ),
-            validator: (value) => Validators.requiredField(value, l10n.authorRequired),
+            validator: (value) =>
+                Validators.requiredField(value, l10n.authorRequired),
           ),
           const SizedBox(height: 16),
           Row(
@@ -411,7 +446,8 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
               ),
               validator: (value) {
                 if (_selectedGenre == 'Custom') {
-                  return Validators.requiredField(value, l10n.customGenreRequired);
+                  return Validators.requiredField(
+                      value, l10n.customGenreRequired,);
                 }
                 return null;
               },
@@ -444,7 +480,7 @@ class _BookFormScreenState extends ConsumerState<BookFormScreen> with SingleTick
           const SizedBox(height: 24),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 children: [
                   SwitchListTile(

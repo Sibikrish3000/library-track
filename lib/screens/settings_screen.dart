@@ -47,10 +47,10 @@ class SettingsScreen extends ConsumerWidget {
                         icon: const Icon(Icons.dark_mode),
                         label: Text(l10n.darkMode),
                       ),
-                      ButtonSegment(
+                      const ButtonSegment(
                         value: ThemeMode.system,
-                        icon: const Icon(Icons.brightness_auto),
-                        label: const Text('System'),
+                        icon: Icon(Icons.brightness_auto),
+                        label: Text('System'),
                       ),
                     ],
                     selected: {themeMode},

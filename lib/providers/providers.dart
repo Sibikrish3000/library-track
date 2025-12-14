@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:libarary_gen/services/book_service.dart';
-import 'package:libarary_gen/services/open_library_service.dart';
 import 'package:libarary_gen/models/book.dart';
 import 'package:libarary_gen/repositories/book_repository.dart';
-import 'package:libarary_gen/services/settings_service.dart';
 import 'package:libarary_gen/repositories/settings_repository.dart';
+import 'package:libarary_gen/services/book_service.dart';
+import 'package:libarary_gen/services/open_library_service.dart';
+import 'package:libarary_gen/services/settings_service.dart';
 
 // Data Sources / Services
 final bookBoxProvider = Provider<Box<Book>>((ref) {

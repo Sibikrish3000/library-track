@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:libarary_gen/models/book.dart';
 import 'package:libarary_gen/providers/book_provider.dart';
 import 'package:libarary_gen/screens/book_form_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BookDetailsScreen extends ConsumerWidget {
   const BookDetailsScreen({
@@ -23,15 +23,15 @@ class BookDetailsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     // Watch for updates to this specific book
-    final currentBook = isPreview 
-        ? book 
+    final currentBook = isPreview
+        ? book
         : ref.watch(bookNotifierProvider).maybeWhen(
-            loaded: (books) => books.firstWhere(
-              (b) => b.id == book.id,
+              loaded: (books) => books.firstWhere(
+                (b) => b.id == book.id,
+                orElse: () => book,
+              ),
               orElse: () => book,
-            ),
-            orElse: () => book,
-          );
+            );
 
     return Scaffold(
       appBar: AppBar(
@@ -41,9 +41,9 @@ class BookDetailsScreen extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () {
-                Navigator.push(
+                Navigator.push<void>(
                   context,
-                  MaterialPageRoute(
+                  MaterialPageRoute<void>(
                     builder: (context) => BookFormScreen(book: currentBook),
                   ),
                 );
@@ -52,7 +52,7 @@ class BookDetailsScreen extends ConsumerWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -77,15 +77,17 @@ class BookDetailsScreen extends ConsumerWidget {
                           currentBook.coverUrl!,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return Container(
+                            return ColoredBox(
                               color: Colors.grey.shade200,
-                              child: const Icon(Icons.book, size: 50, color: Colors.grey),
+                              child: const Icon(Icons.book,
+                                  size: 50, color: Colors.grey,),
                             );
                           },
                         )
-                      : Container(
+                      : ColoredBox(
                           color: Colors.grey.shade200,
-                          child: const Icon(Icons.book, size: 50, color: Colors.grey),
+                          child: const Icon(Icons.book,
+                              size: 50, color: Colors.grey,),
                         ),
                 ),
               ),
@@ -127,21 +129,23 @@ class BookDetailsScreen extends ConsumerWidget {
             if (!isPreview) ...[
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       InkWell(
-                        onTap: () => _showStatusPicker(context, ref, currentBook, l10n),
+                        onTap: () =>
+                            _showStatusPicker(context, ref, currentBook, l10n),
                         borderRadius: BorderRadius.circular(8),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8),
                           child: Column(
                             children: [
                               const Icon(Icons.bookmark),
                               const SizedBox(height: 4),
                               Text(
-                                _getReadingStatusText(currentBook.readingStatus, l10n),
+                                _getReadingStatusText(
+                                    currentBook.readingStatus, l10n,),
                                 style: theme.textTheme.bodySmall,
                               ),
                             ],
@@ -149,15 +153,20 @@ class BookDetailsScreen extends ConsumerWidget {
                         ),
                       ),
                       InkWell(
-                        onTap: () => ref.read(bookNotifierProvider.notifier).toggleFavorite(currentBook),
+                        onTap: () => ref
+                            .read(bookNotifierProvider.notifier)
+                            .toggleFavorite(currentBook),
                         borderRadius: BorderRadius.circular(8),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8),
                           child: Column(
                             children: [
                               Icon(
-                                currentBook.isFavorite ? Icons.favorite : Icons.favorite_border,
-                                color: currentBook.isFavorite ? Colors.red : null,
+                                currentBook.isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color:
+                                    currentBook.isFavorite ? Colors.red : null,
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -206,7 +215,7 @@ class BookDetailsScreen extends ConsumerWidget {
       bottomNavigationBar: isPreview
           ? SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: FilledButton.icon(
                   onPressed: onAdd,
                   icon: const Icon(Icons.add),
@@ -218,8 +227,9 @@ class BookDetailsScreen extends ConsumerWidget {
     );
   }
 
-  void _showStatusPicker(BuildContext context, WidgetRef ref, Book book, AppLocalizations l10n) {
-    showModalBottomSheet(
+  void _showStatusPicker(
+      BuildContext context, WidgetRef ref, Book book, AppLocalizations l10n,) {
+    showModalBottomSheet<void>(
       context: context,
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
@@ -229,7 +239,9 @@ class BookDetailsScreen extends ConsumerWidget {
             title: Text(l10n.toRead),
             selected: book.readingStatus == 'to_read',
             onTap: () {
-              ref.read(bookNotifierProvider.notifier).updateReadingStatus(book, 'to_read');
+              ref
+                  .read(bookNotifierProvider.notifier)
+                  .updateReadingStatus(book, 'to_read');
               Navigator.pop(context);
             },
           ),
@@ -238,7 +250,9 @@ class BookDetailsScreen extends ConsumerWidget {
             title: Text(l10n.reading),
             selected: book.readingStatus == 'reading',
             onTap: () {
-              ref.read(bookNotifierProvider.notifier).updateReadingStatus(book, 'reading');
+              ref
+                  .read(bookNotifierProvider.notifier)
+                  .updateReadingStatus(book, 'reading');
               Navigator.pop(context);
             },
           ),
@@ -247,7 +261,9 @@ class BookDetailsScreen extends ConsumerWidget {
             title: Text(l10n.completed),
             selected: book.readingStatus == 'completed',
             onTap: () {
-              ref.read(bookNotifierProvider.notifier).updateReadingStatus(book, 'completed');
+              ref
+                  .read(bookNotifierProvider.notifier)
+                  .updateReadingStatus(book, 'completed');
               Navigator.pop(context);
             },
           ),

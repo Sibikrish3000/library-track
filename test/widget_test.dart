@@ -1,30 +1,77 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:libarary_gen/providers/providers.dart';
+import 'package:libarary_gen/screens/book_list_screen.dart';
+import 'package:libarary_gen/services/book_service.dart';
+import 'package:libarary_gen/services/settings_service.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
-import 'package:libarary_gen/main.dart';
+import 'widget_test.mocks.dart';
 
+@GenerateMocks([BookService, SettingsService])
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  late MockBookService mockBookService;
+  late MockSettingsService mockSettingsService;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  setUp(() {
+    mockBookService = MockBookService();
+    mockSettingsService = MockSettingsService();
 
-    // Tap the '+' icon and trigger a frame.
+    // Setup default stubs
+    when(mockBookService.getAllBooks()).thenAnswer((_) async => []);
+    when(mockSettingsService.getThemeMode())
+        .thenAnswer((_) async => ThemeMode.system);
+  });
+
+  testWidgets('BookListScreen shows empty state when no books',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookServiceProvider.overrideWithValue(mockBookService),
+          settingsServiceProvider.overrideWithValue(mockSettingsService),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: BookListScreen(),
+        ),
+      ),
+    );
+
+    // Trigger a frame
+    await tester.pumpAndSettle();
+
+    // Verify empty state is shown
+    expect(find.byType(BookListScreen), findsOneWidget);
+    expect(find.byIcon(Icons.add), findsOneWidget);
+  });
+
+  testWidgets('Can navigate to Add Book screen', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookServiceProvider.overrideWithValue(mockBookService),
+          settingsServiceProvider.overrideWithValue(mockSettingsService),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: BookListScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Tap the add button
     await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify we navigated (checking for a widget on the form screen)
+    expect(find.text('Add Book'), findsOneWidget);
   });
 }

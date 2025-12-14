@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
+import 'package:libarary_gen/models/book.dart';
+import 'package:libarary_gen/services/book_service.dart';
 import 'package:libarary_gen/utils/exceptions.dart';
 import 'package:libarary_gen/utils/failures.dart';
-import 'package:libarary_gen/services/book_service.dart';
-import 'package:libarary_gen/models/book.dart';
 
 class BookRepository {
   BookRepository(this.service);

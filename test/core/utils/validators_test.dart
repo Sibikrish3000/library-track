@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:libarary_gen/core/utils/validators.dart';
+import 'package:libarary_gen/utils/validators.dart';
 
 void main() {
   group('Validators', () {

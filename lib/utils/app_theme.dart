@@ -8,7 +8,6 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.blue,
-        brightness: Brightness.light,
       ),
       appBarTheme: const AppBarTheme(
         centerTitle: true,

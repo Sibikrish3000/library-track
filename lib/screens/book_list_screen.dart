@@ -5,9 +5,9 @@ import 'package:libarary_gen/models/book.dart';
 import 'package:libarary_gen/providers/book_provider.dart';
 import 'package:libarary_gen/screens/book_details_screen.dart';
 import 'package:libarary_gen/screens/book_form_screen.dart';
+import 'package:libarary_gen/screens/settings_screen.dart';
 import 'package:libarary_gen/widgets/book_card.dart';
 import 'package:libarary_gen/widgets/empty_state.dart';
-import 'package:libarary_gen/screens/settings_screen.dart';
 
 class BookListScreen extends ConsumerStatefulWidget {
   const BookListScreen({super.key});
@@ -112,7 +112,8 @@ class _BookListScreenState extends ConsumerState<BookListScreen> {
 
     // Filter
     if (_filterStatus != 'all') {
-      processed = processed.where((b) => b.readingStatus == _filterStatus).toList();
+      processed =
+          processed.where((b) => b.readingStatus == _filterStatus).toList();
     }
 
     // Sort
@@ -156,7 +157,8 @@ class _BookListScreenState extends ConsumerState<BookListScreen> {
               });
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'date_added', child: Text('Date Added')),
+              const PopupMenuItem(
+                  value: 'date_added', child: Text('Date Added'),),
               const PopupMenuItem(value: 'title', child: Text('Title')),
               const PopupMenuItem(value: 'author', child: Text('Author')),
             ],
@@ -164,9 +166,9 @@ class _BookListScreenState extends ConsumerState<BookListScreen> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              Navigator.push(
+              Navigator.push<void>(
                 context,
-                MaterialPageRoute(
+                MaterialPageRoute<void>(
                   builder: (context) => const SettingsScreen(),
                 ),
               );
@@ -203,7 +205,8 @@ class _BookListScreenState extends ConsumerState<BookListScreen> {
                     const PopupMenuItem(value: 'all', child: Text('All')),
                     PopupMenuItem(value: 'to_read', child: Text(l10n.toRead)),
                     PopupMenuItem(value: 'reading', child: Text(l10n.reading)),
-                    PopupMenuItem(value: 'completed', child: Text(l10n.completed)),
+                    PopupMenuItem(
+                        value: 'completed', child: Text(l10n.completed),),
                   ],
                 ),
               ],
@@ -242,7 +245,9 @@ class _BookListScreenState extends ConsumerState<BookListScreen> {
                   isGridView: true,
                   onTap: () => _navigateToBookDetails(book),
                   onDelete: () => _deleteBook(book),
-                  onToggleFavorite: () => ref.read(bookNotifierProvider.notifier).toggleFavorite(book),
+                  onToggleFavorite: () => ref
+                      .read(bookNotifierProvider.notifier)
+                      .toggleFavorite(book),
                 );
               },
             );
@@ -257,7 +262,9 @@ class _BookListScreenState extends ConsumerState<BookListScreen> {
                 book: book,
                 onTap: () => _navigateToBookDetails(book),
                 onDelete: () => _deleteBook(book),
-                onToggleFavorite: () => ref.read(bookNotifierProvider.notifier).toggleFavorite(book),
+                onToggleFavorite: () => ref
+                    .read(bookNotifierProvider.notifier)
+                    .toggleFavorite(book),
               );
             },
           );

@@ -11,11 +11,11 @@ class Book with _$Book {
     @HiveField(0) required String id,
     @HiveField(1) required String title,
     @HiveField(2) required String author,
+    @HiveField(6) required DateTime createdAt,
+    @HiveField(7) required DateTime updatedAt,
     @HiveField(3) String? isbn,
     @HiveField(4) String? description,
     @HiveField(5) int? publicationYear,
-    @HiveField(6) required DateTime createdAt,
-    @HiveField(7) required DateTime updatedAt,
     @HiveField(8) String? genre,
     @HiveField(9) String? customGenre,
     @HiveField(10) @Default(false) bool isFavorite,
@@ -25,6 +25,5 @@ class Book with _$Book {
 
   const Book._();
 
-  factory Book.fromJson(Map<String, dynamic> json) =>
-      _$BookFromJson(json);
+  factory Book.fromJson(Map<String, dynamic> json) => _$BookFromJson(json);
 }

@@ -1,6 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:libarary_gen/utils/exceptions.dart';
 import 'package:libarary_gen/models/book.dart';
+import 'package:libarary_gen/utils/exceptions.dart';
 
 abstract class BookService {
   Future<List<Book>> getAllBooks();
@@ -21,7 +21,7 @@ class BookServiceImpl implements BookService {
     try {
       return _box.values.toList();
     } catch (e) {
-      throw CacheException('Failed to load books: ${e.toString()}');
+      throw CacheException('Failed to load books: $e');
     }
   }
 
@@ -30,7 +30,7 @@ class BookServiceImpl implements BookService {
     try {
       return _box.get(id);
     } catch (e) {
-      throw CacheException('Failed to load book: ${e.toString()}');
+      throw CacheException('Failed to load book: $e');
     }
   }
 
@@ -39,7 +39,7 @@ class BookServiceImpl implements BookService {
     try {
       await _box.put(book.id, book);
     } catch (e) {
-      throw CacheException('Failed to add book: ${e.toString()}');
+      throw CacheException('Failed to add book: $e');
     }
   }
 
@@ -48,7 +48,7 @@ class BookServiceImpl implements BookService {
     try {
       await _box.put(book.id, book);
     } catch (e) {
-      throw CacheException('Failed to update book: ${e.toString()}');
+      throw CacheException('Failed to update book: $e');
     }
   }
 
@@ -57,7 +57,7 @@ class BookServiceImpl implements BookService {
     try {
       await _box.delete(id);
     } catch (e) {
-      throw CacheException('Failed to delete book: ${e.toString()}');
+      throw CacheException('Failed to delete book: $e');
     }
   }
 
@@ -66,7 +66,7 @@ class BookServiceImpl implements BookService {
     try {
       final books = _box.values.toList();
       if (query.isEmpty) return books;
-      
+
       final lowercaseQuery = query.toLowerCase();
       return books.where((book) {
         return book.title.toLowerCase().contains(lowercaseQuery) ||
@@ -74,7 +74,7 @@ class BookServiceImpl implements BookService {
             (book.isbn?.toLowerCase().contains(lowercaseQuery) ?? false);
       }).toList();
     } catch (e) {
-      throw CacheException('Failed to search books: ${e.toString()}');
+      throw CacheException('Failed to search books: $e');
     }
   }
 }

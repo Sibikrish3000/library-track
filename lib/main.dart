@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:libarary_gen/utils/app_constants.dart';
-import 'package:libarary_gen/providers/providers.dart';
-import 'package:libarary_gen/utils/app_theme.dart';
 import 'package:libarary_gen/models/book.dart';
-import 'package:libarary_gen/screens/book_list_screen.dart';
+import 'package:libarary_gen/providers/providers.dart';
 import 'package:libarary_gen/providers/theme_provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:libarary_gen/screens/book_list_screen.dart';
+import 'package:libarary_gen/utils/app_constants.dart';
+import 'package:libarary_gen/utils/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

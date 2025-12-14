@@ -12,14 +12,15 @@ class OpenLibraryService {
 
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/search.json?q=${Uri.encodeComponent(query)}&fields=key,title,author_name,editions,editions.key,editions.title,editions.language,editions.description,editions.isbn,first_publish_year,isbn,cover_i,subject,description&limit=40'),
+        Uri.parse(
+            '$_baseUrl/search.json?q=${Uri.encodeComponent(query)}&fields=key,title,author_name,editions,editions.key,editions.title,editions.language,editions.description,editions.isbn,first_publish_year,isbn,cover_i,subject,description&limit=40',),
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(response.body) as Map<String, dynamic>;
         final docs = data['docs'] as List<dynamic>;
 
-        return docs.map((doc) => _mapToBook(doc)).toList();
+        return docs.map(_mapToBook).toList();
       } else {
         throw Exception('Failed to load books');
       }
@@ -29,8 +30,8 @@ class OpenLibraryService {
   }
 
   Future<Book> getBookDetails(Book book) async {
-    String? description = book.description;
-    String? isbn = book.isbn;
+    var description = book.description;
+    var isbn = book.isbn;
 
     try {
       // 1. Fetch Work Details
@@ -39,8 +40,9 @@ class OpenLibraryService {
         final workResponse = await http.get(Uri.parse(workUrl));
 
         if (workResponse.statusCode == 200) {
-          final workData = json.decode(workResponse.body);
-          
+          final workData =
+              json.decode(workResponse.body) as Map<String, dynamic>;
+
           // Parse Description
           final descData = workData['description'];
           if (descData is String) {
@@ -51,15 +53,20 @@ class OpenLibraryService {
 
           // 2. Check for cover_edition to get ISBN if missing
           if (isbn == null) {
-            final coverEditionKey = workData['cover_edition']?['key'] as String?;
+            final coverEdition =
+                workData['cover_edition'] as Map<String, dynamic>?;
+            final coverEditionKey = coverEdition?['key'] as String?;
             if (coverEditionKey != null) {
               final editionUrl = '$_baseUrl$coverEditionKey.json';
               final editionResponse = await http.get(Uri.parse(editionUrl));
 
               if (editionResponse.statusCode == 200) {
-                final editionData = json.decode(editionResponse.body);
-                final isbn10 = (editionData['isbn_10'] as List<dynamic>?)?.firstOrNull as String?;
-                final isbn13 = (editionData['isbn_13'] as List<dynamic>?)?.firstOrNull as String?;
+                final editionData =
+                    json.decode(editionResponse.body) as Map<String, dynamic>;
+                final isbn10 = (editionData['isbn_10'] as List<dynamic>?)
+                    ?.firstOrNull as String?;
+                final isbn13 = (editionData['isbn_13'] as List<dynamic>?)
+                    ?.firstOrNull as String?;
                 isbn = isbn13 ?? isbn10;
               }
             }
@@ -67,7 +74,7 @@ class OpenLibraryService {
         }
       }
     } catch (e) {
-      print('Error fetching book details: $e');
+      // Ignore error fetching details
     }
 
     return book.copyWith(
@@ -76,64 +83,91 @@ class OpenLibraryService {
     );
   }
 
-  Book _mapToBook(Map<String, dynamic> doc) {
+  Book _mapToBook(dynamic docData) {
+    final doc = docData as Map<String, dynamic>;
     final key = doc['key'] as String? ?? const Uuid().v4();
     final title = doc['title'] as String? ?? 'Unknown Title';
-    final authorName = (doc['author_name'] as List<dynamic>?)?.firstOrNull as String? ?? 'Unknown Author';
-    
+    final authorName =
+        (doc['author_name'] as List<dynamic>?)?.firstOrNull?.toString() ??
+            'Unknown Author';
+
     // Try to get ISBN from editions first, then fallback to top-level isbn list
     String? isbn;
-    String? description = doc['description'] is String ? doc['description'] : (doc['description'] is Map ? doc['description']['value'] : null);
-    
+    final descriptionData = doc['description'];
+    String? description;
+
+    if (descriptionData is String) {
+      description = descriptionData;
+    } else if (descriptionData is Map) {
+      final descMap = descriptionData as Map<String, dynamic>;
+      description = descMap['value'] as String?;
+    }
+
     // Check editions if available (requires 'editions' field in search query)
     if (doc.containsKey('editions') && doc['editions'] is Map) {
-      final editionsDocs = doc['editions']['docs'] as List<dynamic>?;
+      final editionsMap = doc['editions'] as Map<String, dynamic>;
+      final editionsDocs = editionsMap['docs'] as List<dynamic>?;
       if (editionsDocs != null && editionsDocs.isNotEmpty) {
         final firstEdition = editionsDocs.first as Map<String, dynamic>;
-        
+
         // Try to get description from edition if missing
         if (description == null) {
-           final edDesc = firstEdition['description'];
-           if (edDesc is String) description = edDesc;
-           else if (edDesc is Map) description = edDesc['value'];
+          final edDesc = firstEdition['description'];
+          if (edDesc is String) {
+            description = edDesc;
+          } else if (edDesc is Map) {
+            final edDescMap = edDesc as Map<String, dynamic>;
+            description = edDescMap['value'] as String?;
+          }
         }
 
         final editionIsbns = firstEdition['isbn'] as List<dynamic>?;
         if (editionIsbns != null && editionIsbns.isNotEmpty) {
-           // Prefer ISBN-13 (usually starts with 978 or 979)
-           isbn = editionIsbns.firstWhere(
-             (i) => i.toString().length == 13, 
-             orElse: () => editionIsbns.first
-           ).toString();
+          // Prefer ISBN-13 (usually starts with 978 or 979)
+          isbn = editionIsbns
+              .firstWhere(
+                (i) => i.toString().length == 13,
+                orElse: () => editionIsbns.first,
+              )
+              .toString();
         }
       }
     }
 
     // Fallback to top-level isbn list if still null
     if (isbn == null) {
-       final isbnList = (doc['isbn'] as List<dynamic>?);
-       if (isbnList != null && isbnList.isNotEmpty) {
-          // Prefer ISBN-13
-           isbn = isbnList.firstWhere(
-             (i) => i.toString().length == 13, 
-             orElse: () => isbnList.first
-           ).toString();
-       }
+      final isbnList = doc['isbn'] as List<dynamic>?;
+      if (isbnList != null && isbnList.isNotEmpty) {
+        // Prefer ISBN-13
+        isbn = isbnList
+            .firstWhere(
+              (i) => i.toString().length == 13,
+              orElse: () => isbnList.first,
+            )
+            .toString();
+      }
     }
 
     final firstPublishYear = doc['first_publish_year'] as int?;
     final coverI = doc['cover_i'] as int?;
-    
+
     // Try to determine genre from subjects
     String? genre;
-    final subjects = (doc['subject'] as List<dynamic>?)?.map((e) => e.toString()).toList();
+    final subjects =
+        (doc['subject'] as List<dynamic>?)?.map((e) => e.toString()).toList();
     if (subjects != null && subjects.isNotEmpty) {
       // Simple mapping logic - can be expanded
-      if (subjects.any((s) => s.toLowerCase().contains('fiction'))) genre = 'Fiction';
-      else if (subjects.any((s) => s.toLowerCase().contains('history'))) genre = 'History';
-      else if (subjects.any((s) => s.toLowerCase().contains('biography'))) genre = 'Biography';
-      else if (subjects.any((s) => s.toLowerCase().contains('science'))) genre = 'Science';
-      else genre = 'Custom';
+      if (subjects.any((s) => s.toLowerCase().contains('fiction'))) {
+        genre = 'Fiction';
+      } else if (subjects.any((s) => s.toLowerCase().contains('history'))) {
+        genre = 'History';
+      } else if (subjects.any((s) => s.toLowerCase().contains('biography'))) {
+        genre = 'Biography';
+      } else if (subjects.any((s) => s.toLowerCase().contains('science'))) {
+        genre = 'Science';
+      } else {
+        genre = 'Custom';
+      }
     }
 
     return Book(

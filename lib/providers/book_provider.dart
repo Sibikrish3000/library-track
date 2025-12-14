@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:libarary_gen/providers/providers.dart';
 import 'package:libarary_gen/models/book.dart';
-import 'package:libarary_gen/repositories/book_repository.dart';
 import 'package:libarary_gen/providers/book_state.dart';
+import 'package:libarary_gen/providers/providers.dart';
+import 'package:libarary_gen/repositories/book_repository.dart';
 import 'package:uuid/uuid.dart';
 
 class BookNotifier extends StateNotifier<BookState> {
@@ -70,6 +70,7 @@ class BookNotifier extends StateNotifier<BookState> {
     required String id,
     required String title,
     required String author,
+    required DateTime createdAt,
     String? isbn,
     String? description,
     int? publicationYear,
@@ -77,7 +78,6 @@ class BookNotifier extends StateNotifier<BookState> {
     String? customGenre,
     bool isFavorite = false,
     String readingStatus = 'to_read',
-    required DateTime createdAt,
     String? coverUrl,
   }) async {
     final book = Book(
