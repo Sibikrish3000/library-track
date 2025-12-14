@@ -3,8 +3,12 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, develop ]
+
+permissions:
+  contents: write
 
 jobs:
   analyze-and-test:
@@ -14,6 +18,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Verify Version Match
+        # Only run this check if a tag triggered the workflow
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          # Extract version from tag (remove 'refs/tags/v')
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          
+          # Extract version from pubspec.yaml (remove 'version: ' and anything after '+')
+          PUB_VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1 | tr -d ' ')
+          
+          echo "Tag Version: $TAG_VERSION"
+          echo "Pubspec Version: $PUB_VERSION"
+          
+          if [ "$TAG_VERSION" != "$PUB_VERSION" ]; then
+            echo "::error::Version Mismatch! Git Tag (v$TAG_VERSION) does not match pubspec.yaml ($PUB_VERSION)."
+            exit 1
+          fi
+          echo "✅ Version Verified"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -34,9 +57,6 @@ jobs:
       - name: Analyze code
         run: flutter analyze
 
-      # - name: Check formatting
-      #   run: dart format --set-exit-if-changed .
-
       - name: Run tests
         run: flutter test --coverage
 
@@ -47,10 +67,10 @@ jobs:
           fail_ci_if_error: false
 
   build-android:
-    name: Build Android APK
+    name: Build Android APKs
     needs: analyze-and-test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     
     steps:
       - name: Checkout code
@@ -78,49 +98,37 @@ jobs:
       - name: Generate code
         run: flutter pub run build_runner build --delete-conflicting-outputs
 
-      - name: Build APK
+      # 1. Build Universal APK
+      - name: Build Universal APK
         run: flutter build apk --release
 
-      - name: Upload APK artifact
+      # 2. Stage Universal APK
+      - name: Stage Universal APK
+        run: |
+          mkdir -p apk_staging
+          mv build/app/outputs/flutter-apk/app-release.apk apk_staging/app-universal.apk
+
+      # 3. Build Split APKs (v7 and v8)
+      - name: Build Split APKs
+        run: flutter build apk --release --split-per-abi
+
+      # 4. Stage Split APKs
+      - name: Stage Split APKs
+        run: |
+          mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk apk_staging/
+          mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk apk_staging/
+
+      - name: Upload Android Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-
-  build-ios:
-    name: Build iOS
-    needs: analyze-and-test
-    runs-on: macos-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.3'
-          channel: 'stable'
-          cache: true
-
-      - name: Disable Flutter analytics
-        run: flutter config --no-analytics
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Generate code
-        run: flutter pub run build_runner build --delete-conflicting-outputs
-
-      - name: Build iOS (no signing)
-        run: flutter build ios --release --no-codesign
+          name: android-apks
+          path: apk_staging/*
 
   build-web:
     name: Build Web
     needs: analyze-and-test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     
     steps:
       - name: Checkout code
@@ -150,3 +158,49 @@ jobs:
         with:
           name: web-build
           path: build/web
+
+  deploy-release:
+    name: Deploy to Release
+    needs: [build-android, build-web]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Download Android Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apks
+          path: release-artifacts/android
+
+      - name: Download Web Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: release-artifacts/web
+
+      - name: Prepare Release Files
+        run: |
+          VERSION_TAG=${GITHUB_REF_NAME}
+          
+          # Rename Android Artifacts
+          mv release-artifacts/android/app-universal.apk release-artifacts/android/app-universal-${VERSION_TAG}.apk
+          mv release-artifacts/android/app-armeabi-v7a-release.apk release-artifacts/android/app-armeabi-v7a-${VERSION_TAG}.apk
+          mv release-artifacts/android/app-arm64-v8a-release.apk release-artifacts/android/app-arm64-v8a-${VERSION_TAG}.apk
+          
+          # Zip Web Build
+          cd release-artifacts/web
+          zip -r ../../web-build-${VERSION_TAG}.zip .
+          cd ../..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            release-artifacts/android/app-universal-${{ github.ref_name }}.apk
+            release-artifacts/android/app-armeabi-v7a-${{ github.ref_name }}.apk
+            release-artifacts/android/app-arm64-v8a-${{ github.ref_name }}.apk
+            web-build-${{ github.ref_name }}.zip
