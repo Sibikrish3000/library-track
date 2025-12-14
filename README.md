@@ -1,9 +1,13 @@
 # Personal Library Manager
 
-[![CI/CD Pipeline](https://github.com/yourusername/libarary_gen/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/yourusername/libarary_gen/actions)
-[![codecov](https://codecov.io/gh/yourusername/libarary_gen/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/libarary_gen)
+[![CI/CD Pipeline](https://github.com/sibikrish3000/library_track/actions/workflows/main.yml/badge.svg)](https://github.com/sibikrish3000/library_track/actions)
+[![codecov](https://codecov.io/gh/sibikrish3000/library_track/branch/main/graph/badge.svg)](https://codecov.io/gh/sibikrish3000/library_track)
 
 A production-ready Flutter application for managing your personal book library, demonstrating mastery of **Clean Architecture**, **advanced state management**, and **robust testing practices**.
+
+
+## Demo
+![](demo/android.webp)
 
 ## 📱 Features
 
@@ -27,38 +31,18 @@ A production-ready Flutter application for managing your personal book library, 
 
 ## 🏗️ Architecture
 
-This application follows **Clean Architecture** principles with three distinct layers:
+This project uses a pragmatic, layered structure aligned with the current repo:
 
 ```
 lib/
-├── core/                          # Shared utilities and base classes
-│   ├── constants/                 # App-wide constants
-│   ├── errors/                    # Error handling (Failures, Exceptions)
-│   ├── theme/                     # Material 3 theme configuration
-│   ├── utils/                     # Validators and utilities
-│   └── providers/                 # Dependency injection providers
-│
-├── features/                      # Feature-based modules
-│   ├── library/                   # Book management feature
-│   │   ├── domain/               # Business logic layer
-│   │   │   ├── entities/         # Book entity (pure Dart)
-│   │   │   ├── repositories/     # Repository interfaces
-│   │   │   └── usecases/         # Business use cases
-│   │   ├── data/                 # Data layer
-│   │   │   ├── models/           # Data models (Hive/JSON)
-│   │   │   ├── datasources/      # Local data source
-│   │   │   └── repositories/     # Repository implementation
-│   │   └── presentation/         # UI layer
-│   │       ├── providers/        # Riverpod state notifiers
-│   │       ├── screens/          # Screen widgets
-│   │       └── widgets/          # Reusable widgets
-│   │
-│   └── settings/                  # Settings feature
-│       ├── domain/
-│       ├── data/
-│       └── presentation/
-│
-└── l10n/                          # Localization files
+├── models/                # Hive/JSON models (Freezed)
+├── providers/             # Riverpod providers & notifiers
+├── repositories/          # Repositories wrapping services
+├── screens/               # UI screens (Flutter widgets)
+├── services/              # Local + remote services (Hive, OpenLibrary)
+├── utils/                 # Constants, themes, validators, failures
+├── widgets/               # Reusable UI components
+└── l10n/                  # Localization ARB files
 ```
 
 ### Dependency Flow
@@ -75,14 +59,14 @@ Presentation → Domain ← Data
 ### Prerequisites
 - Flutter SDK ≥ 3.5.3
 - Dart SDK ≥ 3.5.3
-- Android Studio / VS Code with Flutter plugins
+- Android Studio or VS Code with Flutter plugins
 - Git
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/libarary_gen.git
+   git clone https://github.com/sibikrish3000/library_track.git
    cd libarary_gen
    ```
 
@@ -128,32 +112,6 @@ dart format --set-exit-if-changed .
 dart format .
 ```
 
-## 🧪 Testing Strategy
-
-### Test Coverage
-- **Unit Tests**: Repository implementations, use cases, validators
-- **Widget Tests**: Critical UI flows (adding books, search, delete with undo)
-- **Integration Tests**: End-to-end user scenarios (not yet implemented)
-
-### Test Structure
-```
-test/
-├── core/
-│   └── utils/
-│       └── validators_test.dart
-├── features/
-│   └── library/
-│       ├── data/
-│       │   └── repositories/
-│       │       └── book_repository_impl_test.dart
-│       ├── domain/
-│       │   └── usecases/
-│       │       └── get_all_books_test.dart
-│       └── presentation/
-│           └── screens/
-│               └── book_list_screen_test.dart
-```
-
 ## 📦 Key Dependencies
 
 | Package | Purpose |
@@ -177,12 +135,11 @@ test/
 
 ## 🔒 Data Persistence
 
-Books are stored locally using **Hive**, a fast and lightweight NoSQL database:
-- Automatic serialization with Hive TypeAdapters
-- Type-safe data access
-- Efficient query performance
+Books are stored locally using **Hive** with `BookAdapter` registered at app start. Boxes:
+- `books`: persists all book entries and metadata
+- `settings`: persists app settings (e.g., theme mode)
 
-Settings (theme mode) are persisted in a separate Hive box.
+Note: The app no longer deletes boxes on startup; data persists across restarts.
 
 ## 🌍 Internationalization
 
@@ -256,15 +213,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 👤 Author
 
-Your Name - [@yourusername](https://github.com/yourusername)
-
-## 🙏 Acknowledgments
-
-- Flutter team for the amazing framework
-- Clean Architecture principles by Robert C. Martin (Uncle Bob)
-- Riverpod by Remi Rousselet
-- All open-source contributors
-
----
+Sibi Krish - [@sibikrish3000](https://github.com/sibikrish3000)
 
 **Built with ❤️ using Flutter**

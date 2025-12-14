@@ -18,9 +18,12 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.24.3'
           channel: 'stable'
           cache: true
+
+      - name: Disable Flutter analytics
+        run: flutter config --no-analytics
 
       - name: Get dependencies
         run: flutter pub get
@@ -56,9 +59,12 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.24.3'
           channel: 'stable'
           cache: true
+
+      - name: Disable Flutter analytics
+        run: flutter config --no-analytics
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -94,9 +100,12 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.24.3'
           channel: 'stable'
           cache: true
+
+      - name: Disable Flutter analytics
+        run: flutter config --no-analytics
 
       - name: Get dependencies
         run: flutter pub get
@@ -120,9 +129,12 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.24.3'
           channel: 'stable'
           cache: true
+
+      - name: Disable Flutter analytics
+        run: flutter config --no-analytics
 
       - name: Get dependencies
         run: flutter pub get
